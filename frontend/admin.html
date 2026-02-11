@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ADMIN PANEL — Survive or Die</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #0d0d14;
+      --bg3: #111122;
+      --purple: #7b68ee;
+      --purple-dim: #5a4cd4;
+      --purple-glow: rgba(123, 104, 238, .35);
+      --red: #ff2e4c;
+      --red-dim: #cc1a35;
+      --red-glow: rgba(255, 46, 76, .35);
+      --wht: #e8e8e8;
+      --gray: #555568;
+      --grayL: #8888a0;
+      --grn: #00ff88;
+      --cyan: #00d4ff;
+      --amb: #ffaa00;
+      --brd: #1a1a2e;
+    }
+
+    html {
+      scroll-behavior: smooth
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--wht);
+      overflow-x: hidden;
+      line-height: 1.6
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, .06) 2px, rgba(0, 0, 0, .06) 4px);
+      pointer-events: none;
+      z-index: 9999
+    }
+
+    /* Top bar */
+    .admin-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 15, .97);
+      border-bottom: 2px solid var(--purple);
+      padding: 10px 24px;
+      z-index: 1001;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 16px
+    }
+
+    .admin-bar .logo {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--purple);
+      letter-spacing: 2px;
+      text-shadow: 0 0 20px var(--purple-glow)
+    }
+
+    .admin-bar .sep {
+      width: 1px;
+      height: 24px;
+      background: var(--brd)
+    }
+
+    .admin-bar .label {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--grayL)
+    }
+
+    .admin-bar .back {
+      margin-left: auto;
+      font-size: 12px;
+      color: var(--gray);
+      cursor: pointer;
+      text-decoration: none;
+      letter-spacing: 1px;
+      transition: color .2s
+    }
+
+    .admin-bar .back:hover {
+      color: var(--purple)
+    }
+
+    .admin-bar .live-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      letter-spacing: 1px;
+      color: var(--grayL)
+    }
+
+    .admin-bar .live-stats b {
+      font-weight: 700
+    }
+
+    .admin-bar .live-stats .g {
+      color: var(--grn)
+    }
+
+    .admin-bar .live-stats .r {
+      color: var(--red)
+    }
+
+    .admin-bar .live-stats .p {
+      color: var(--purple)
+    }
+
+    /* Layout */
+    .dashboard {
+      padding: 66px 16px 24px;
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px
+    }
+
+    .dashboard.three-col {
+      grid-template-columns: 1fr 1fr 1fr
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--brd);
+      border-radius: 6px;
+      padding: 20px;
+      transition: border-color .3s
+    }
+
+    .card:hover {
+      border-color: rgba(123, 104, 238, .3)
+    }
+
+    .card.full {
+      grid-column: 1/-1
+    }
+
+    .card .card-hd {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--brd)
+    }
+
+    .card .card-hd .icon {
+      font-size: 20px
+    }
+
+    .card .card-hd .title {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--purple)
+    }
+
+    .card .card-hd .badge {
+      margin-left: auto;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 3px;
+      border: 1px solid var(--purple);
+      color: var(--purple)
+    }
+
+    /* Inputs */
+    .input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap
+    }
+
+    .input-row label {
+      font-size: 12px;
+      color: var(--grayL);
+      letter-spacing: 1px;
+      min-width: 80px
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      background: var(--bg3);
+      border: 1px solid var(--brd);
+      color: var(--wht);
+      font-family: inherit;
+      font-size: 13px;
+      padding: 8px 12px;
+      border-radius: 4px;
+      outline: none;
+      transition: border-color .2s
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--purple)
+    }
+
+    input[type="range"] {
+      accent-color: var(--purple);
+      flex: 1
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 9px 18px;
+      background: none;
+      border: 1px solid var(--purple);
+      color: var(--purple);
+      font-family: inherit;
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all .2s;
+      white-space: nowrap
+    }
+
+    .btn:hover {
+      background: rgba(123, 104, 238, .12);
+      box-shadow: 0 0 15px rgba(123, 104, 238, .15)
+    }
+
+    .btn:active {
+      transform: scale(.97)
+    }
+
+    .btn.danger {
+      border-color: var(--red);
+      color: var(--red)
+    }
+
+    .btn.danger:hover {
+      background: rgba(255, 46, 76, .1);
+      box-shadow: 0 0 15px rgba(255, 46, 76, .15)
+    }
+
+    .btn.success {
+      border-color: var(--grn);
+      color: var(--grn)
+    }
+
+    .btn.success:hover {
+      background: rgba(0, 255, 136, .08)
+    }
+
+    .btn.primary {
+      background: var(--purple);
+      color: #fff;
+      border-color: var(--purple)
+    }
+
+    .btn.primary:hover {
+      background: var(--purple-dim);
+      box-shadow: 0 0 20px var(--purple-glow)
+    }
+
+    .btn:disabled {
+      opacity: .4;
+      cursor: not-allowed
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    /* Tables */
+    .tbl-wrap {
+      overflow-x: auto;
+      max-height: 400px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--brd) transparent
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px
+    }
+
+    th {
+      text-align: left;
+      padding: 9px 10px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--gray);
+      border-bottom: 2px solid var(--brd);
+      position: sticky;
+      top: 0;
+      background: var(--bg2);
+      z-index: 1
+    }
+
+    td {
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(26, 26, 46, .5)
+    }
+
+    tr:hover td {
+      background: rgba(123, 104, 238, .03)
+    }
+
+    tr.dead-row {
+      opacity: .5
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px
+    }
+
+    .status-dot.alive {
+      background: var(--grn);
+      box-shadow: 0 0 6px rgba(0, 255, 136, .4)
+    }
+
+    .status-dot.dead {
+      background: var(--red);
+      box-shadow: 0 0 6px rgba(255, 46, 76, .4)
+    }
+
+    .status-dot.minted {
+      background: var(--amb);
+      box-shadow: 0 0 6px rgba(255, 170, 0, .4)
+    }
+
+    .clickable {
+      cursor: pointer;
+      color: var(--purple);
+      font-weight: 700
+    }
+
+    .clickable:hover {
+      text-decoration: underline
+    }
+
+    /* Stat cards */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px
+    }
+
+    .stat-card {
+      background: var(--bg3);
+      border: 1px solid var(--brd);
+      border-radius: 4px;
+      padding: 14px;
+      text-align: center
+    }
+
+    .stat-card .sc-val {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--purple);
+      text-shadow: 0 0 10px var(--purple-glow)
+    }
+
+    .stat-card .sc-val.g {
+      color: var(--grn)
+    }
+
+    .stat-card .sc-val.r {
+      color: var(--red)
+    }
+
+    .stat-card .sc-val.a {
+      color: var(--amb)
+    }
+
+    .stat-card .sc-val.c {
+      color: var(--cyan)
+    }
+
+    .stat-card .sc-lbl {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--grayL);
+      margin-top: 4px
+    }
+
+    /* Log */
+    .log-container {
+      background: #040407;
+      border: 1px solid var(--brd);
+      border-radius: 4px;
+      height: 350px;
+      overflow-y: auto;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.8;
+      scrollbar-width: thin;
+      scrollbar-color: var(--brd) transparent
+    }
+
+    .log-entry {
+      display: flex;
+      gap: 8px;
+      padding: 2px 4px;
+      border-radius: 3px;
+      border-left: 2px solid transparent;
+      animation: fadeUp .3s ease-out
+    }
+
+    .log-entry .le-ts {
+      color: var(--gray);
+      flex-shrink: 0;
+      min-width: 75px;
+      font-size: 11px
+    }
+
+    .log-entry .le-type {
+      flex-shrink: 0;
+      min-width: 90px;
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700
+    }
+
+    .log-entry .le-msg {
+      flex: 1;
+      color: var(--wht)
+    }
+
+    .log-entry.t-death {
+      border-left-color: var(--red)
+    }
+
+    .log-entry.t-death .le-type {
+      color: var(--red)
+    }
+
+    .log-entry.t-death .le-msg {
+      color: var(--red)
+    }
+
+    .log-entry.t-betrayal {
+      border-left-color: var(--amb)
+    }
+
+    .log-entry.t-betrayal .le-type {
+      color: var(--amb)
+    }
+
+    .log-entry.t-cooperation {
+      border-left-color: var(--grn)
+    }
+
+    .log-entry.t-cooperation .le-type {
+      color: var(--grn)
+    }
+
+    .log-entry.t-spawn {
+      border-left-color: var(--cyan)
+    }
+
+    .log-entry.t-spawn .le-type {
+      color: var(--cyan)
+    }
+
+    .log-entry.t-wound {
+      border-left-color: var(--amb)
+    }
+
+    .log-entry.t-wound .le-type {
+      color: var(--amb)
+    }
+
+    .log-entry.t-exploration {
+      border-left-color: var(--purple)
+    }
+
+    .log-entry.t-exploration .le-type {
+      color: var(--purple)
+    }
+
+    .log-entry.t-system {
+      border-left-color: var(--gray)
+    }
+
+    .log-entry.t-system .le-type {
+      color: var(--gray)
+    }
+
+    .log-entry.t-encounter .le-type {
+      color: var(--wht)
+    }
+
+    .log-entry.t-fragment {
+      border-left-color: var(--cyan)
+    }
+
+    .log-entry.t-fragment .le-type {
+      color: var(--cyan)
+    }
+
+    .log-entry.t-revive {
+      border-left-color: var(--grn)
+    }
+
+    .log-entry.t-revive .le-type {
+      color: var(--grn)
+    }
+
+    .log-entry.t-tokens {
+      border-left-color: var(--amb)
+    }
+
+    .log-entry.t-tokens .le-type {
+      color: var(--amb)
+    }
+
+    .log-entry.t-mutual_betrayal {
+      border-left-color: var(--red)
+    }
+
+    .log-entry.t-mutual_betrayal .le-type {
+      color: var(--red)
+    }
+
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap
+    }
+
+    /* Agent detail modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .7);
+      z-index: 2000;
+      backdrop-filter: blur(4px)
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--purple);
+      border-radius: 8px;
+      width: 90%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 24px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--brd) transparent
+    }
+
+    .modal .modal-hd {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--brd)
+    }
+
+    .modal .modal-hd .m-id {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--purple)
+    }
+
+    .modal .modal-hd .m-close {
+      margin-left: auto;
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--gray);
+      transition: color .2s
+    }
+
+    .modal .modal-hd .m-close:hover {
+      color: var(--red)
+    }
+
+    .modal .m-section {
+      margin-bottom: 16px
+    }
+
+    .modal .m-section .m-title {
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 8px
+    }
+
+    .modal .m-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      font-size: 13px
+    }
+
+    .modal .m-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 4px 0
+    }
+
+    .modal .m-stat .k {
+      color: var(--grayL)
+    }
+
+    .modal .m-stat .v {
+      color: var(--wht);
+      font-weight: 600
+    }
+
+    .modal .m-memory {
+      font-size: 12px;
+      max-height: 180px;
+      overflow-y: auto;
+      background: var(--bg3);
+      border-radius: 4px;
+      padding: 10px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--brd) transparent
+    }
+
+    .modal .m-mem-entry {
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(26, 26, 46, .3);
+      color: var(--grayL)
+    }
+
+    .modal .m-mem-entry .mm-with {
+      color: var(--purple);
+      font-weight: 600
+    }
+
+    .modal .m-mem-entry .mm-out {
+      font-weight: 500
+    }
+
+    .modal .m-mem-entry .mm-out.coop {
+      color: var(--grn)
+    }
+
+    .modal .m-mem-entry .mm-out.betray {
+      color: var(--red)
+    }
+
+    .modal .m-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      flex-wrap: wrap
+    }
+
+    /* Responsive */
+    @media(max-width:900px) {
+      .dashboard {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* Toggle switch */
+    .toggle {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 22px
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0
+    }
+
+    .toggle .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background: var(--bg3);
+      border: 1px solid var(--brd);
+      border-radius: 22px;
+      transition: .3s
+    }
+
+    .toggle .slider::before {
+      content: '';
+      position: absolute;
+      height: 16px;
+      width: 16px;
+      left: 2px;
+      bottom: 2px;
+      background: var(--gray);
+      border-radius: 50%;
+      transition: .3s
+    }
+
+    .toggle input:checked+.slider {
+      background: rgba(123, 104, 238, .2);
+      border-color: var(--purple)
+    }
+
+    .toggle input:checked+.slider::before {
+      transform: translateX(18px);
+      background: var(--purple)
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(4px)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0)
+      }
+    }
+
+    @keyframes pulse-glow {
+
+      0%,
+      100% {
+        box-shadow: 0 0 8px var(--purple-glow)
+      }
+
+      50% {
+        box-shadow: 0 0 20px var(--purple-glow), 0 0 40px rgba(123, 104, 238, .1)
+      }
+    }
+
+    /* Spinner */
+    .spinner {
+      display: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--brd);
+      border-top-color: var(--purple);
+      border-radius: 50%;
+      animation: spin .6s linear infinite
+    }
+
+    .spinner.active {
+      display: inline-block
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: var(--bg2);
+      border: 1px solid var(--purple);
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--wht);
+      z-index: 3000;
+      animation: fadeUp .3s;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .5)
+    }
+
+    .toast.err {
+      border-color: var(--red)
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- TOP BAR -->
+  <div class="admin-bar">
+    <span class="logo">🔒 ADMIN</span>
+    <span class="sep"></span>
+    <span class="label">Survive or Die — Control Panel</span>
+    <div class="live-stats">
+      <span>ALIVE: <b class="g" id="bar-alive">0</b></span>
+      <span>DEAD: <b class="r" id="bar-dead">0</b></span>
+      <span>MINTED: <b class="p" id="bar-minted">0</b>/1000</span>
+    </div>
+    <a class="back" href="/" onclick="sessionStorage.removeItem('adminToken')">← BACK TO GAME</a>
+  </div>
+
+  <!-- AGENT DETAIL MODAL -->
+  <div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modal-content"></div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div class="dashboard" id="dashboard">
+
+    <!-- SPAWN AGENTS -->
+    <div class="card">
+      <div class="card-hd"><span class="icon">🤖</span><span class="title">Spawn Agents</span><span
+          class="badge">TESTING</span></div>
+      <div class="input-row">
+        <label>Count</label>
+        <input type="number" id="spawn-count" value="10" min="1" max="100" style="width:80px">
+      </div>
+      <div class="input-row">
+        <label>Level</label>
+        <select id="spawn-level" style="width:140px">
+          <option value="random">Random (1-10)</option>
+          <option value="1">Level 1</option>
+          <option value="2">Level 2</option>
+          <option value="3">Level 3</option>
+          <option value="4">Level 4</option>
+          <option value="5">Level 5</option>
+          <option value="6">Level 6</option>
+          <option value="7">Level 7</option>
+          <option value="8">Level 8</option>
+          <option value="9">Level 9</option>
+          <option value="10">Level 10</option>
+        </select>
+      </div>
+      <div class="btn-group">
+        <button class="btn primary" onclick="spawnAgents()">🚀 SPAWN AGENTS</button>
+        <span class="spinner" id="spawn-spin"></span>
+      </div>
+      <div id="spawn-result" style="margin-top:12px;font-size:12px;color:var(--grayL);max-height:160px;overflow-y:auto">
+      </div>
+    </div>
+
+    <!-- EXPLORATION CONTROL -->
+    <div class="card">
+      <div class="card-hd"><span class="icon">🗺️</span><span class="title">Exploration Control</span></div>
+      <div class="input-row">
+        <label>Scenario</label>
+        <select id="sim-scenario" style="width:180px">
+          <option value="all">All Scenarios</option>
+          <option value="mempool">The Mempool</option>
+          <option value="darkpool">The Dark Pool</option>
+          <option value="liquidation">Liquidation Zone</option>
+          <option value="genesis">Genesis Block</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label>Speed</label>
+        <select id="sim-speed" style="width:100px">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+          <option value="5">5x</option>
+          <option value="10">10x</option>
+        </select>
+      </div>
+      <div class="input-row">
+        <label>Auto-Run</label>
+        <label class="toggle"><input type="checkbox" id="auto-run"><span class="slider"></span></label>
+        <span style="font-size:11px;color:var(--grayL)" id="auto-run-label">OFF</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn primary" onclick="runSimulation(1)">▶ RUN 1 CYCLE</button>
+        <button class="btn" onclick="runSimulation(10)">⏩ RUN 10 CYCLES</button>
+        <span class="spinner" id="sim-spin"></span>
+      </div>
+    </div>
+
+    <!-- GAME STATE -->
+    <div class="card full">
+      <div class="card-hd"><span class="icon">📊</span><span class="title">Game State</span><button class="btn"
+          onclick="refreshState()" style="margin-left:auto">↻ REFRESH</button></div>
+      <div class="stat-grid" id="state-stats"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>ID</th>
+              <th>NAME</th>
+              <th>STATUS</th>
+              <th>LVL</th>
+              <th>XP</th>
+              <th>HP</th>
+              <th>REP</th>
+              <th>WND</th>
+              <th>KILLS</th>
+              <th>COOPS</th>
+              <th>BTRY</th>
+              <th>$SOD</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="agents-tbody">
+            <tr>
+              <td colspan="14" style="text-align:center;color:var(--gray);padding:30px">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ECONOMY -->
+    <div class="card">
+      <div class="card-hd"><span class="icon">💰</span><span class="title">Economy</span></div>
+      <div class="stat-grid" id="economy-stats"></div>
+      <div class="input-row">
+        <label>Rewards</label>
+        <select id="reward-mult" style="width:100px">
+          <option value="0.5">0.5x</option>
+          <option value="1" selected>1x</option>
+          <option value="2">2x</option>
+          <option value="5">5x</option>
+        </select>
+        <button class="btn" onclick="adjustRewards()">APPLY</button>
+      </div>
+    </div>
+
+    <!-- SIMULATION -->
+    <div class="card">
+      <div class="card-hd"><span class="icon">⚡</span><span class="title">Simulation</span></div>
+      <div class="btn-group" style="flex-direction:column;gap:10px">
+        <button class="btn primary" onclick="runSimulation(1)" style="width:100%">▶ RUN FULL SIMULATION</button>
+        <button class="btn" onclick="runSimulation(10)" style="width:100%">⏩ RUN 10 EXPLORATIONS</button>
+        <button class="btn" onclick="runSimulation(50)" style="width:100%">🔥 RUN 50 EXPLORATIONS</button>
+        <button class="btn danger" onclick="resetEverything()" style="width:100%">☠️ RESET EVERYTHING</button>
+      </div>
+    </div>
+
+    <!-- LOGS -->
+    <div class="card full">
+      <div class="card-hd"><span class="icon">📜</span><span class="title">Logs</span><span
+          style="margin-left:auto;display:flex;gap:8px"><button class="btn" onclick="exportLogs()">📤 EXPORT
+            JSON</button><button class="btn" onclick="clearLogs()">🗑️ CLEAR</button></span></div>
+      <div class="filter-row">
+        <input type="text" id="log-filter-agent" placeholder="Filter by Agent ID" style="width:160px">
+        <select id="log-filter-type" style="width:140px">
+          <option value="">All Types</option>
+          <option value="death">Death</option>
+          <option value="betrayal">Betrayal</option>
+          <option value="cooperation">Cooperation</option>
+          <option value="mutual_betrayal">Mutual Betrayal</option>
+          <option value="wound">Wound</option>
+          <option value="spawn">Spawn</option>
+          <option value="exploration">Exploration</option>
+          <option value="encounter">Encounter</option>
+          <option value="fragment">Fragment</option>
+          <option value="revive">Revive</option>
+          <option value="tokens">Tokens</option>
+          <option value="system">System</option>
+        </select>
+        <button class="btn" onclick="refreshLogs()">FILTER</button>
+      </div>
+      <div class="log-container" id="log-container"></div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+      var TOKEN = sessionStorage.getItem('adminToken');
+      if (!TOKEN) { window.location.href = '/'; return; }
+
+      var autoRunInterval = null;
+
+      function api(method, path, body) {
+        var opts = { method: method, headers: { 'Authorization': 'Bearer ' + TOKEN, 'Content-Type': 'application/json' } };
+        if (body) opts.body = JSON.stringify(body);
+        return fetch('/api/admin' + path, opts).then(function (r) {
+          if (r.status === 401 || r.status === 403) { sessionStorage.removeItem('adminToken'); window.location.href = '/'; throw new Error('Unauthorized'); }
+          return r.json();
+        });
+      }
+
+      function toast(msg, err) {
+        var t = document.createElement('div');
+        t.className = 'toast' + (err ? ' err' : '');
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(function () { t.remove(); }, 3000);
+      }
+
+      function ts(ms) {
+        var d = new Date(ms);
+        return ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
+      }
+
+      // ── SPAWN ──
+      window.spawnAgents = function () {
+        var count = parseInt(document.getElementById('spawn-count').value) || 10;
+        var level = document.getElementById('spawn-level').value;
+        document.getElementById('spawn-spin').classList.add('active');
+        api('POST', '/spawn', { count: count, level: level }).then(function (d) {
+          document.getElementById('spawn-spin').classList.remove('active');
+          if (d.success) {
+            toast('Spawned ' + d.spawned + ' agents!');
+            var html = '<div style="color:var(--grn);margin-bottom:6px">✅ Spawned ' + d.spawned + ' agents</div>';
+            for (var i = 0; i < d.agents.length; i++) {
+              var a = d.agents[i];
+              html += '<div style="padding:2px 0">' + a.id + ' <span style="color:var(--purple)">' + a.name + '</span> Lv.' + a.level + '</div>';
+            }
+            document.getElementById('spawn-result').innerHTML = html;
+            refreshState();
+            refreshLogs();
+          } else {
+            toast(d.error, true);
+          }
+        }).catch(function (e) { document.getElementById('spawn-spin').classList.remove('active'); toast('Error: ' + e.message, true); });
+      };
+
+      // ── SIMULATION ──
+      window.runSimulation = function (count) {
+        var scenario = document.getElementById('sim-scenario').value;
+        document.getElementById('sim-spin').classList.add('active');
+        api('POST', '/simulate', { count: count, scenario: scenario }).then(function (d) {
+          document.getElementById('sim-spin').classList.remove('active');
+          if (d.success) {
+            var msg = count === 1 ? 'Simulation complete! Alive: ' + d.cycle.alive + ' Dead: ' + d.cycle.dead : d.cyclesRun + ' cycles complete!';
+            toast(msg);
+            refreshState();
+            refreshLogs();
+          } else {
+            toast(d.error, true);
+          }
+        }).catch(function (e) { document.getElementById('sim-spin').classList.remove('active'); toast('Error: ' + e.message, true); });
+      };
+
+      // ── AUTO-RUN ──
+      document.getElementById('auto-run').addEventListener('change', function () {
+        var on = this.checked;
+        document.getElementById('auto-run-label').textContent = on ? 'ON' : 'OFF';
+        if (on) {
+          var speed = parseInt(document.getElementById('sim-speed').value) || 1;
+          var interval = Math.max(500, 5000 / speed);
+          autoRunInterval = setInterval(function () { runSimulation(1); }, interval);
+          toast('Auto-run started (' + speed + 'x speed)');
+        } else {
+          clearInterval(autoRunInterval);
+          autoRunInterval = null;
+          toast('Auto-run stopped');
+        }
+      });
+
+      // ── STATE ──
+      window.refreshState = function () {
+        api('GET', '/state').then(function (d) {
+          // Live stats bar
+          document.getElementById('bar-alive').textContent = d.agents.alive;
+          document.getElementById('bar-dead').textContent = d.agents.dead;
+          document.getElementById('bar-minted').textContent = d.agents.total;
+
+          // Stat cards
+          document.getElementById('state-stats').innerHTML =
+            '<div class="stat-card"><div class="sc-val g">' + d.agents.alive + '</div><div class="sc-lbl">Alive</div></div>' +
+            '<div class="stat-card"><div class="sc-val r">' + d.agents.dead + '</div><div class="sc-lbl">Dead</div></div>' +
+            '<div class="stat-card"><div class="sc-val">' + d.agents.total + '</div><div class="sc-lbl">Total Minted</div></div>' +
+            '<div class="stat-card"><div class="sc-val c">' + d.agents.exploring + '</div><div class="sc-lbl">Exploring</div></div>' +
+            '<div class="stat-card"><div class="sc-val a">' + d.economy.totalTokensInCirculation + '</div><div class="sc-lbl">$SOD Circulating</div></div>' +
+            '<div class="stat-card"><div class="sc-val r">' + d.economy.totalTokensBurned + '</div><div class="sc-lbl">$SOD Burned</div></div>';
+
+          // Economy
+          document.getElementById('economy-stats').innerHTML =
+            '<div class="stat-card"><div class="sc-val a">' + d.economy.totalTokensInCirculation + '</div><div class="sc-lbl">In Circulation</div></div>' +
+            '<div class="stat-card"><div class="sc-val r">' + d.economy.totalTokensBurned + '</div><div class="sc-lbl">Burned</div></div>' +
+            '<div class="stat-card"><div class="sc-val">' + d.economy.rewardMultiplier + 'x</div><div class="sc-lbl">Reward Mult</div></div>';
+
+          // Agent table
+          var list = d.agents.list.sort(function (a, b) { return b.xp - a.xp; });
+          var html = '';
+          for (var i = 0; i < list.length; i++) {
+            var a = list[i];
+            var alive = a.status === 'active';
+            html += '<tr class="' + (alive ? '' : 'dead-row') + '">' +
+              '<td>' + (i + 1) + '</td>' +
+              '<td><span class="clickable" onclick="showAgent(\'' + a.id + '\')">' + a.id + '</span></td>' +
+              '<td style="color:var(--grayL)">' + (a.name || '-') + '</td>' +
+              '<td><span class="status-dot ' + a.status + '"></span>' + a.status.toUpperCase() + '</td>' +
+              '<td>' + a.level + '</td>' +
+              '<td>' + a.xp + '</td>' +
+              '<td style="color:' + (a.health > 66 ? 'var(--grn)' : a.health > 33 ? 'var(--amb)' : 'var(--red)') + '">' + a.health + '</td>' +
+              '<td>' + a.reputation + '</td>' +
+              '<td style="color:var(--red)">' + a.wounds + '/3</td>' +
+              '<td>' + a.kills + '</td>' +
+              '<td style="color:var(--grn)">' + a.cooperations + '</td>' +
+              '<td style="color:var(--red)">' + a.betrayals + '</td>' +
+              '<td style="color:var(--amb)">' + (a.tokens || 0) + '</td>' +
+              '<td><div class="btn-group">' +
+              (alive ? '<button class="btn danger" onclick="killAgent(\'' + a.id + '\')" style="padding:4px 8px;font-size:10px">KILL</button>' :
+                '<button class="btn success" onclick="reviveAgent(\'' + a.id + '\')" style="padding:4px 8px;font-size:10px">REVIVE</button>') +
+              '<button class="btn" onclick="addTokens(\'' + a.id + '\')" style="padding:4px 8px;font-size:10px">+$SOD</button>' +
+              '</div></td>' +
+              '</tr>';
+          }
+          document.getElementById('agents-tbody').innerHTML = html || '<tr><td colspan="14" style="text-align:center;color:var(--gray);padding:30px">No agents. Spawn some!</td></tr>';
+        }).catch(function (e) { toast('Failed to load state: ' + e.message, true); });
+      };
+
+      // ── KILL / REVIVE / TOKENS ──
+      window.killAgent = function (id) {
+        api('POST', '/kill', { agentId: id }).then(function (d) {
+          toast(d.success ? 'Agent ' + id + ' killed' : d.error, !d.success);
+          refreshState(); refreshLogs();
+        });
+      };
+
+      window.reviveAgent = function (id) {
+        api('POST', '/revive', { agentId: id }).then(function (d) {
+          toast(d.success ? 'Agent ' + id + ' revived!' : d.error, !d.success);
+          refreshState(); refreshLogs();
+        });
+      };
+
+      window.addTokens = function (id) {
+        var amt = prompt('How many $SOD to add?', '100');
+        if (!amt) return;
+        api('POST', '/add-tokens', { agentId: id, amount: parseInt(amt) }).then(function (d) {
+          toast(d.success ? 'Added ' + amt + ' $SOD' : d.error, !d.success);
+          refreshState(); refreshLogs();
+        });
+      };
+
+      // ── AGENT DETAIL ──
+      window.showAgent = function (id) {
+        api('GET', '/agent/' + id).then(function (a) {
+          var mem = a.memory || {};
+          var encounters = mem.encounters || [];
+          var alliances = mem.alliances || [];
+          var betrayedBy = mem.betrayedBy || [];
+          var alive = a.status === 'active';
+
+          var html = '<div class="modal-hd"><span class="m-id">' + a.id + '</span><span style="color:var(--grayL);font-size:13px">' + (a.name || '') + '</span><span class="m-close" onclick="closeModal()">✕</span></div>';
+
+          // Stats
+          html += '<div class="m-section"><div class="m-title">STATUS</div><div class="m-grid">';
+          html += '<div class="m-stat"><span class="k">Status</span><span class="v" style="color:' + (alive ? 'var(--grn)' : 'var(--red)') + '">' + a.status.toUpperCase() + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Health</span><span class="v">' + a.health + '/100</span></div>';
+          html += '<div class="m-stat"><span class="k">Level</span><span class="v">' + a.level + '</span></div>';
+          html += '<div class="m-stat"><span class="k">XP</span><span class="v">' + a.xp + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Reputation</span><span class="v">' + a.reputation + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Wounds</span><span class="v" style="color:var(--red)">' + a.wounds + '/' + a.maxWounds + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Tokens</span><span class="v" style="color:var(--amb)">' + (a.tokens || 0) + ' $SOD</span></div>';
+          html += '<div class="m-stat"><span class="k">Wallet</span><span class="v" style="font-size:11px">' + a.wallet + '</span></div>';
+          html += '</div></div>';
+
+          // Combat stats
+          html += '<div class="m-section"><div class="m-title">COMBAT STATS</div><div class="m-grid">';
+          html += '<div class="m-stat"><span class="k">Explorations</span><span class="v">' + a.stats.explorations + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Cooperations</span><span class="v" style="color:var(--grn)">' + a.stats.cooperations + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Betrayals</span><span class="v" style="color:var(--red)">' + a.stats.betrayals + '</span></div>';
+          html += '<div class="m-stat"><span class="k">Kills</span><span class="v" style="color:var(--red)">' + a.stats.kills + '</span></div>';
+          html += '</div></div>';
+
+          // Skills
+          var sk = a.skills || {};
+          var skNames = ['scavenger', 'diplomat', 'shadow', 'warrior', 'survivor'];
+          html += '<div class="m-section"><div class="m-title">SKILLS</div>';
+          for (var s = 0; s < skNames.length; s++) {
+            var lv = sk[skNames[s]] || 0;
+            var pips = '';
+            for (var j = 0; j < 5; j++) pips += '<span style="display:inline-block;width:12px;height:12px;border:1px solid ' + (j < lv ? 'var(--cyan)' : 'var(--brd)') + ';background:' + (j < lv ? 'var(--cyan)' : 'transparent') + ';border-radius:2px;margin-right:2px"></span>';
+            html += '<div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;color:var(--grayL)"><span>' + skNames[s].charAt(0).toUpperCase() + skNames[s].slice(1) + '</span><span>' + pips + '</span></div>';
+          }
+          html += '</div>';
+
+          // Alliances
+          html += '<div class="m-section"><div class="m-title">ALLIANCES (' + alliances.length + ')</div>';
+          if (alliances.length > 0) {
+            html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+            for (var al = 0; al < alliances.length; al++) html += '<span style="padding:3px 8px;border:1px solid rgba(0,255,136,.3);color:var(--grn);border-radius:3px;font-size:11px">' + alliances[al] + '</span>';
+            html += '</div>';
+          } else html += '<div style="color:var(--gray);font-size:12px">No alliances</div>';
+          html += '</div>';
+
+          // Betrayed by
+          html += '<div class="m-section"><div class="m-title">BETRAYED BY (' + betrayedBy.length + ')</div>';
+          if (betrayedBy.length > 0) {
+            html += '<div style="display:flex;gap:6px;flex-wrap:wrap">';
+            for (var b = 0; b < betrayedBy.length; b++) html += '<span style="padding:3px 8px;border:1px solid rgba(255,46,76,.3);color:var(--red);border-radius:3px;font-size:11px">' + betrayedBy[b].by + '</span>';
+            html += '</div>';
+          } else html += '<div style="color:var(--gray);font-size:12px">Never betrayed</div>';
+          html += '</div>';
+
+          // Encounters history
+          html += '<div class="m-section"><div class="m-title">ENCOUNTER HISTORY (' + encounters.length + ')</div><div class="m-memory">';
+          if (encounters.length === 0) html += '<div style="color:var(--gray)">No encounters recorded</div>';
+          for (var e = encounters.length - 1; e >= Math.max(0, encounters.length - 30); e--) {
+            var enc = encounters[e];
+            var outClass = enc.outcome.indexOf('betray') >= 0 ? 'betray' : 'coop';
+            html += '<div class="m-mem-entry"><span style="color:var(--gray);font-size:10px">' + ts(enc.timestamp) + '</span> with <span class="mm-with">' + enc.with + '</span> → <span class="mm-out ' + outClass + '">' + enc.outcome.replace(/_/g, ' ') + '</span></div>';
+          }
+          html += '</div></div>';
+
+          // Actions
+          html += '<div class="m-actions">';
+          if (alive) {
+            html += '<button class="btn danger" onclick="killAgent(\'' + a.id + '\');closeModal()">☠️ KILL</button>';
+          } else {
+            html += '<button class="btn success" onclick="reviveAgent(\'' + a.id + '\');closeModal()">💚 REVIVE</button>';
+          }
+          html += '<button class="btn" onclick="addTokens(\'' + a.id + '\')">💰 ADD $SOD</button>';
+          html += '</div>';
+
+          document.getElementById('modal-content').innerHTML = html;
+          document.getElementById('modal-overlay').classList.add('active');
+        });
+      };
+
+      window.closeModal = function () {
+        document.getElementById('modal-overlay').classList.remove('active');
+      };
+
+      // ── ECONOMY ──
+      window.adjustRewards = function () {
+        var mult = parseFloat(document.getElementById('reward-mult').value);
+        api('POST', '/adjust-rewards', { multiplier: mult }).then(function (d) {
+          toast(d.success ? 'Rewards set to ' + d.multiplier + 'x' : d.error, !d.success);
+          refreshState();
+        });
+      };
+
+      // ── RESET ──
+      window.resetEverything = function () {
+        if (!confirm('⚠️ This will DELETE ALL agents, explorations, and data. Are you sure?')) return;
+        if (!confirm('🔥 LAST CHANCE: This is irreversible. Confirm reset?')) return;
+        api('POST', '/reset').then(function (d) {
+          toast(d.success ? 'Everything reset!' : d.error, !d.success);
+          refreshState(); refreshLogs();
+        });
+      };
+
+      // ── LOGS ──
+      window.refreshLogs = function () {
+        var agentFilter = document.getElementById('log-filter-agent').value.trim();
+        var typeFilter = document.getElementById('log-filter-type').value;
+        var query = '?limit=500';
+        if (agentFilter) query += '&agentId=' + encodeURIComponent(agentFilter);
+        if (typeFilter) query += '&type=' + encodeURIComponent(typeFilter);
+        api('GET', '/logs' + query).then(function (d) {
+          var logs = d.logs || [];
+          var container = document.getElementById('log-container');
+          if (logs.length === 0) {
+            container.innerHTML = '<div style="color:var(--gray);text-align:center;padding:40px">No logs yet. Run a simulation!</div>';
+            return;
+          }
+          var html = '';
+          for (var i = logs.length - 1; i >= 0; i--) {
+            var l = logs[i];
+            html += '<div class="log-entry t-' + l.type + '">' +
+              '<span class="le-ts">' + ts(l.timestamp) + '</span>' +
+              '<span class="le-type">' + l.type + '</span>' +
+              '<span class="le-msg">' + l.message + '</span></div>';
+          }
+          container.innerHTML = html;
+        });
+      };
+
+      window.clearLogs = function () {
+        document.getElementById('log-container').innerHTML = '<div style="color:var(--gray);text-align:center;padding:40px">Logs cleared</div>';
+      };
+
+      window.exportLogs = function () {
+        api('GET', '/logs?limit=2000').then(function (d) {
+          var blob = new Blob([JSON.stringify(d.logs, null, 2)], { type: 'application/json' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url; a.download = 'sod-logs-' + Date.now() + '.json';
+          a.click(); URL.revokeObjectURL(url);
+          toast('Logs exported!');
+        });
+      };
+
+      // ── INIT ──
+      refreshState();
+      refreshLogs();
+
+      // Auto-refresh every 5s
+      setInterval(function () {
+        refreshState();
+        refreshLogs();
+      }, 5000);
+
+      // Keyboard shortcut: ESC closes modal
+      document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeModal(); });
+
+    })();
+  </script>
+</body>
+
+</html>
